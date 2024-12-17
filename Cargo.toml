@@ -5,4 +5,7 @@ edition = "2021"
 
 [dependencies]
 bsky-sdk = "0.1.14"
+dotenv = "0.15.0"
+serde = "1.0.216"
+serde_json = "1.0.133"
 tokio = { version = "1", features = ["full"] }

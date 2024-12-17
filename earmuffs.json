@@ -1,0 +1,13 @@
+{
+  "auth": {
+    "handle": "gnmerritt.net"
+  },
+  "lists": [
+    {
+      "name": "All followers of Jesse Singal",
+      "includes": [
+          {"followers_of": "jessesingal.com"}
+      ]
+    }
+  ]
+}
