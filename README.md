@@ -22,7 +22,7 @@ Here's an example that uses all the types of sources (followers, follows, explic
       ],
       "excludes": [
           {"followed_by": "gnmerritt.net"}, // but not people I follow explicitly
-          {"users": "pleasant-person.example.com"} // and not this user either
+          {"users": ["pleasant.example.com", "fred.example.com"]} // and not these users either
       ]
     }
   ]
