@@ -1,6 +1,6 @@
 pub mod bsky;
 
-use bsky_sdk::api::types::string::AtIdentifier;
+use bsky_sdk::api::types::string::{AtIdentifier, Did};
 use bsky_sdk::BskyAgent;
 use serde::Deserialize;
 use std::collections::HashSet;
@@ -17,7 +17,7 @@ pub enum Source {
 async fn resolve_sources(
     agent: &BskyAgent,
     sources: &Vec<Source>,
-) -> Result<HashSet<AtIdentifier>, Box<dyn std::error::Error>> {
+) -> Result<HashSet<Did>, Box<dyn std::error::Error>> {
     let mut matches = HashSet::new();
     for s in sources {
         matches.extend(get_matching_accounts(s, agent).await?);
@@ -28,7 +28,7 @@ async fn resolve_sources(
 async fn get_matching_accounts(
     source: &Source,
     agent: &BskyAgent,
-) -> Result<HashSet<AtIdentifier>, Box<dyn std::error::Error>> {
+) -> Result<HashSet<Did>, Box<dyn std::error::Error>> {
     match source {
         Source::Followers { followers_of } => bsky::get_followers(agent, followers_of).await,
         Source::Follows { followed_by } => bsky::get_follows(agent, followed_by).await,
@@ -46,7 +46,7 @@ pub struct Blocklist {
 pub async fn resolve_blocklist(
     agent: &BskyAgent,
     list: &Blocklist,
-) -> Result<HashSet<AtIdentifier>, Box<dyn std::error::Error>> {
+) -> Result<HashSet<Did>, Box<dyn std::error::Error>> {
     let mut included = resolve_sources(agent, &list.includes).await?;
     let excluded = resolve_sources(agent, &list.excludes).await?;
     included.retain(|a| !excluded.contains(a));
@@ -55,7 +55,7 @@ pub async fn resolve_blocklist(
 
 #[derive(Deserialize)]
 pub struct BskyLogin {
-    pub handle: String,
+    pub handle: AtIdentifier,
     pub app_password: Option<String>,
 }
 
