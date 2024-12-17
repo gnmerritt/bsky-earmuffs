@@ -12,7 +12,7 @@ use bsky_sdk::{
     BskyAgent,
 };
 
-async fn resolve_handle(
+pub(crate) async fn resolve_handle(
     agent: &BskyAgent,
     actor: &Handle,
 ) -> Result<Did, Box<dyn std::error::Error>> {

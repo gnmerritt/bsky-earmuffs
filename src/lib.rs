@@ -12,6 +12,7 @@ use std::{fs::File, io::BufReader, path::Path};
 pub enum Source {
     Followers { followers_of: AtIdentifier },
     Follows { followed_by: AtIdentifier },
+    Hardcoded { users: Vec<AtIdentifier> },
 }
 
 async fn resolve_sources(
@@ -32,6 +33,17 @@ async fn get_matching_accounts(
     match source {
         Source::Followers { followers_of } => bsky::get_followers(agent, followers_of).await,
         Source::Follows { followed_by } => bsky::get_follows(agent, followed_by).await,
+        Source::Hardcoded { users: actors } => {
+            let mut dids = HashSet::new();
+            for actor in actors {
+                let did = match actor {
+                    AtIdentifier::Did(did) => did.clone(),
+                    AtIdentifier::Handle(h) => bsky::resolve_handle(agent, h).await?,
+                };
+                dids.insert(did);
+            }
+            Ok(dids)
+        }
     }
 }
 
