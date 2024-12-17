@@ -5,12 +5,31 @@ use bsky_sdk::{
         self,
         app::bsky::graph::defs::{ListViewData, MODLIST},
         types::{
-            string::{AtIdentifier, Datetime, Did},
+            string::{AtIdentifier, Datetime, Did, Handle},
             Collection, TryIntoUnknown,
         },
     },
     BskyAgent,
 };
+
+async fn resolve_handle(
+    agent: &BskyAgent,
+    actor: &Handle,
+) -> Result<Did, Box<dyn std::error::Error>> {
+    let res = agent
+        .api
+        .com
+        .atproto
+        .identity
+        .resolve_handle(
+            api::com::atproto::identity::resolve_handle::ParametersData {
+                handle: actor.clone(),
+            }
+            .into(),
+        )
+        .await?;
+    Ok(res.did.clone())
+}
 
 pub(crate) async fn get_followers(
     agent: &BskyAgent,
@@ -22,7 +41,10 @@ pub(crate) async fn get_followers(
         AtIdentifier::Did(did) => {
             found.insert(did.clone());
         }
-        __ => {} // TODO: resolve and add
+        AtIdentifier::Handle(h) => {
+            let did = resolve_handle(agent, h).await?;
+            found.insert(did);
+        }
     }
     loop {
         let res = agent
@@ -61,7 +83,10 @@ pub(crate) async fn get_follows(
         AtIdentifier::Did(did) => {
             found.insert(did.clone());
         }
-        __ => {} // TODO: resolve and add
+        AtIdentifier::Handle(h) => {
+            let did = resolve_handle(agent, h).await?;
+            found.insert(did);
+        }
     }
     loop {
         let res = agent

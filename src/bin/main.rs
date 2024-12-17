@@ -40,7 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(_) => {}
                 Err(e) if e.to_string().contains("RateLimitExceeded") => {
                     println!("got rate limited, pausing");
-                    thread::sleep(Duration::from_secs(60 * 5));
+                    thread::sleep(Duration::from_secs(60 * 15));
                 }
                 Err(e) => panic!("{:?}", e),
             }
