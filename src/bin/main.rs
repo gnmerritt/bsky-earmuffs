@@ -1,6 +1,6 @@
 use bsky_sdk::BskyAgent;
 use earmuffs::bsky::{self, get_users_on_list};
-use std::env;
+use std::{env, thread, time::Duration};
 use tokio;
 
 #[tokio::main]
@@ -28,10 +28,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .expect(&format!("list '{}' was not created", spec.name));
         let current_users = get_users_on_list(&agent, &list.uri).await?;
         let users_on_list = earmuffs::resolve_blocklist(&agent, &spec).await?;
+        println!(
+            "list currently contains {} users, will have {} after updating",
+            current_users.len(),
+            users_on_list.len(),
+        );
 
         let to_add = users_on_list.difference(&current_users);
         for user in to_add {
-            bsky::add_user_to_list(&agent, &list.uri, user).await?;
+            match bsky::add_user_to_list(&agent, &list.uri, user).await {
+                Ok(_) => {}
+                Err(e) if e.to_string().contains("RateLimitExceeded") => {
+                    println!("got rate limited, pausing");
+                    thread::sleep(Duration::from_secs(60 * 5));
+                }
+                Err(e) => panic!("{:?}", e),
+            }
         }
         let to_remove = current_users.difference(&users_on_list);
         for user in to_remove {
