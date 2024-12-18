@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "handle": "earmuffs.gnmerritt.net",
+    "app_password": "can be here"
+  },
+  "lists": [
+    {
+      "name": "All followers of Example Tim",
+      "includes": [
+          {"followers_of": "tim.example.com"}
+      ],
+      "excludes": [
+          {"followed_by": "gnmerritt.net"},
+          {"users": ["pleasant.example.com", "fred.example.com"]}
+      ]
+    }
+  ]
+}

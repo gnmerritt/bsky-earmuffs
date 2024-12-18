@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::{fs::File, io::BufReader, path::Path};
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Source {
     Followers { followers_of: AtIdentifier },
@@ -47,7 +47,7 @@ async fn get_matching_accounts(
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Blocklist {
     pub name: String,
     pub includes: Vec<Source>,
@@ -65,13 +65,13 @@ pub async fn resolve_blocklist(
     Ok(included)
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct BskyLogin {
     pub handle: AtIdentifier,
     pub app_password: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct EarmuffsConfig {
     pub auth: BskyLogin,
     pub lists: Vec<Blocklist>,
@@ -82,4 +82,15 @@ pub fn read_config<P: AsRef<Path>>(path: P) -> Result<EarmuffsConfig, Box<dyn Er
     let reader = BufReader::new(file);
     let c = serde_json::from_reader(reader)?;
     Ok(c)
+}
+
+#[cfg(test)]
+mod test {
+    use crate::read_config;
+
+    #[test]
+    fn test_read_config() {
+        let c = read_config("examples/example.json");
+        assert!(c.is_ok(), "got error {:?}", c);
+    }
 }
