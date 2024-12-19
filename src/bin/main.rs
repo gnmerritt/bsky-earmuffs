@@ -27,6 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .get(&spec.name)
             .expect(&format!("list '{}' was not created", spec.name));
         let current_users = get_users_on_list(&agent, &list.uri).await?;
+        let current_user_dids = current_users.keys().cloned().collect();
         let users_on_list = earmuffs::resolve_blocklist(&agent, &spec).await?;
         println!(
             "list currently contains {} users, will have {} after updating",
@@ -34,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             users_on_list.len(),
         );
 
-        let to_add = users_on_list.difference(&current_users);
+        let to_add = users_on_list.difference(&current_user_dids);
         for user in to_add {
             match bsky::add_user_to_list(&agent, &list.uri, user).await {
                 Ok(_) => {}
@@ -45,9 +46,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Err(e) => panic!("{:?}", e),
             }
         }
-        let to_remove = current_users.difference(&users_on_list);
+        let to_remove = current_user_dids.difference(&users_on_list);
         for user in to_remove {
-            bsky::remove_user_from_list(&agent, &list.uri, user).await?;
+            let uri = current_users.get(user);
+            if let Some(uri) = uri {
+                bsky::remove_user_from_list(&agent, user, uri).await?;
+            }
         }
     }
 

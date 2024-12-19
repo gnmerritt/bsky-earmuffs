@@ -186,9 +186,9 @@ pub async fn get_lists(
 pub async fn get_users_on_list(
     agent: &BskyAgent,
     list: &String,
-) -> Result<HashSet<Did>, Box<dyn std::error::Error>> {
+) -> Result<HashMap<Did, String>, Box<dyn std::error::Error>> {
     let mut cursor = None;
-    let mut found = HashSet::new();
+    let mut found = HashMap::new();
     loop {
         let res = agent
             .api
@@ -206,7 +206,7 @@ pub async fn get_users_on_list(
             .await?;
         cursor = res.cursor.clone();
         for user in res.data.items.iter() {
-            found.insert(user.data.subject.did.clone());
+            found.insert(user.data.subject.did.clone(), user.uri.clone());
         }
         if cursor.is_none() {
             break;
@@ -221,38 +221,21 @@ pub async fn add_user_to_list(
     user: &Did,
 ) -> Result<bool, Box<dyn std::error::Error>> {
     println!("Adding user {:?}", user);
-    let session = agent.get_session().await.expect("must be logged in");
     let record = api::app::bsky::graph::listitem::RecordData {
         list: list.clone(),
         subject: user.clone(),
         created_at: Datetime::now(),
-    }
-    .try_into_unknown()?;
-    agent
-        .api
-        .com
-        .atproto
-        .repo
-        .create_record(
-            api::com::atproto::repo::create_record::InputData {
-                collection: api::app::bsky::graph::Listitem::nsid(),
-                record,
-                repo: session.data.did.into(),
-                rkey: None,
-                swap_commit: None,
-                validate: Some(true),
-            }
-            .into(),
-        )
-        .await?;
+    };
+    agent.create_record(record).await?;
     Ok(true)
 }
 
 pub async fn remove_user_from_list(
-    _agent: &BskyAgent,
-    _list: &String,
+    agent: &BskyAgent,
     user: &Did,
+    uri: &String,
 ) -> Result<bool, Box<dyn std::error::Error>> {
-    println!("Removing user {:?}", user);
-    todo!(); // need to implement this eventually
+    println!("Removing user {:?} at {}", user, uri);
+    agent.delete_record(uri).await?;
+    Ok(true)
 }
