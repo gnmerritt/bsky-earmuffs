@@ -119,7 +119,6 @@ pub async fn create_list(
     agent: &BskyAgent,
     name: &String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let session = agent.get_session().await.expect("must be logged in");
     let record = api::app::bsky::graph::list::RecordData {
         name: name.clone(),
         purpose: MODLIST.to_string(),
@@ -128,25 +127,8 @@ pub async fn create_list(
         labels: None,
         avatar: None,
         created_at: Datetime::now(),
-    }
-    .try_into_unknown()?;
-    let res = agent
-        .api
-        .com
-        .atproto
-        .repo
-        .create_record(
-            api::com::atproto::repo::create_record::InputData {
-                collection: api::app::bsky::graph::List::nsid(),
-                record,
-                repo: session.data.did.into(),
-                rkey: None,
-                swap_commit: None,
-                validate: Some(true),
-            }
-            .into(),
-        )
-        .await?;
+    };
+    let res = agent.create_record(record).await?;
     println!("created new list by name {}, got {:?}", name, res);
     Ok(())
 }

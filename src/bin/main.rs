@@ -37,15 +37,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let to_add = users_on_list.difference(&current_user_dids);
         for user in to_add {
-            match bsky::add_user_to_list(&agent, &list.uri, user).await {
-                Ok(_) => {}
-                Err(e) if e.to_string().contains("RateLimitExceeded") => {
-                    println!("got rate limited, pausing");
-                    thread::sleep(Duration::from_secs(60 * 15));
-                }
-                Err(e) => panic!("{:?}", e),
-            }
+            bsky::add_user_to_list(&agent, &list.uri, user).await?;
         }
+        // remove anyone who has unfollowed him (TODO add a delay here eventually)
         let to_remove = current_user_dids.difference(&users_on_list);
         for user in to_remove {
             let uri = current_users.get(user);
