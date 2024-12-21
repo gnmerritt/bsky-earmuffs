@@ -4,10 +4,7 @@ use bsky_sdk::{
     api::{
         self,
         app::bsky::graph::defs::{ListViewData, MODLIST},
-        types::{
-            string::{AtIdentifier, Datetime, Did, Handle},
-            Collection, TryIntoUnknown,
-        },
+        types::string::{AtIdentifier, Datetime, Did, Handle},
     },
     BskyAgent,
 };

@@ -1,6 +1,6 @@
 use bsky_sdk::BskyAgent;
 use earmuffs::bsky::{self, get_users_on_list};
-use std::{env, thread, time::Duration};
+use std::env;
 use tokio;
 
 #[tokio::main]
