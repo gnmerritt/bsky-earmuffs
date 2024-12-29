@@ -53,7 +53,7 @@ pub(crate) async fn get_followers(
                 api::app::bsky::graph::get_followers::ParametersData {
                     actor: actor.clone(),
                     cursor,
-                    limit: None,
+                    limit: Some(100.try_into()?),
                 }
                 .into(),
             )
@@ -95,7 +95,7 @@ pub(crate) async fn get_follows(
                 api::app::bsky::graph::get_follows::ParametersData {
                     actor: actor.clone(),
                     cursor,
-                    limit: None,
+                    limit: Some(100.try_into()?),
                 }
                 .into(),
             )
@@ -178,7 +178,7 @@ pub async fn get_users_on_list(
                 api::app::bsky::graph::get_list::ParametersData {
                     list: list.clone(),
                     cursor,
-                    limit: None,
+                    limit: Some(100.try_into()?),
                 }
                 .into(),
             )
